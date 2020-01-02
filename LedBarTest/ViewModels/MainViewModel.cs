@@ -12,16 +12,17 @@ namespace LedBarTest.ViewModels
 {
     public class MainViewModel : ReactiveObject
     {
+        // GPIO PIN CONFIGURATION
         private const int Data = 17;
         private const int Clock = 22;
         private const int Latch = 27;
-        private readonly CompositeDisposable disposables = new CompositeDisposable();
+
         private readonly LedProgressBar progressBar;
         private IDisposable animation;
 
         public MainViewModel()
         {
-            var controller = new GpioController().DisposeWith(disposables);
+            var controller = new GpioController();
             progressBar = new LedProgressBar(controller, Data, Clock, Latch);
 
             Animate = ReactiveCommand.Create(ToggleAnimation);
@@ -57,7 +58,8 @@ namespace LedBarTest.ViewModels
 
             var frames = leftToRight.Concat(Enumerable.Reverse(leftToRight));
 
-            return frames.ToObservable()
+            return frames
+                .ToObservable()
                 .Select(bits => Observable.Return(bits).Delay(TimeSpan.FromMilliseconds(100)))
                 .Concat()
                 .Repeat()
